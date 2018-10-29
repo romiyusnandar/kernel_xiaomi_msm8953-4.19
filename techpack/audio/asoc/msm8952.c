@@ -74,8 +74,12 @@ static int msm8952_dig_mclk_event(struct snd_soc_dapm_widget *w,
 			      struct snd_kcontrol *kcontrol, int event);
 static int msm8952_wsa_switch_event(struct snd_soc_dapm_widget *w,
 			      struct snd_kcontrol *kcontrol, int event);
-static int msm_dmic_event(struct snd_soc_dapm_widget *w,
-			  struct snd_kcontrol *kcontrol, int event);
+
+#ifdef CONFIG_MACH_XIAOMI_TISSOT
+int ext_pa_gpio = 0;
+int ext_pa_status = 0;
+#endif
+
 /*
  * Android L spec
  * Need to report LINEIN
@@ -84,14 +88,30 @@ static int msm_dmic_event(struct snd_soc_dapm_widget *w,
 static struct wcd_mbhc_config mbhc_cfg = {
 	.read_fw_bin = false,
 	.calibration = NULL,
+#ifdef CONFIG_MACH_XIAOMI_TISSOT
+	.detect_extn_cable = false,
+#else
 	.detect_extn_cable = true,
+#endif
 	.mono_stero_detection = false,
 	.swap_gnd_mic = NULL,
 	.hs_ext_micbias = true,
 	.key_code[0] = KEY_MEDIA,
+<<<<<<< HEAD
 	.key_code[1] = BTN_1,
 	.key_code[2] = BTN_2,
 	.key_code[3] = 0,
+=======
+#if (defined CONFIG_MACH_XIAOMI_MIDO) || (defined CONFIG_MACH_XIAOMI_TISSOT)
+	.key_code[1] = BTN_1,
+	.key_code[2] = BTN_2,
+	.key_code[3] = 0,
+#else
+	.key_code[1] = KEY_VOICECOMMAND,
+	.key_code[2] = KEY_VOLUMEUP,
+	.key_code[3] = KEY_VOLUMEDOWN,
+#endif
+>>>>>>> aa2742c31ab3 (techpack: Import initial changes for Xiaomi msm8953)
 	.key_code[4] = 0,
 	.key_code[5] = 0,
 	.key_code[6] = 0,
@@ -399,7 +419,13 @@ int is_ext_spk_gpio_support(struct platform_device *pdev,
 				__func__, pdata->spk_ext_pa_gpio);
 			return -EINVAL;
 		}
+#ifdef CONFIG_MACH_XIAOMI_TISSOT
+		ext_pa_gpio = pdata->spk_ext_pa_gpio;
+#endif
 	}
+#ifdef CONFIG_MACH_XIAOMI_MIDO
+	gpio_direction_output(pdata->spk_ext_pa_gpio, 0);
+#endif
 	return 0;
 }
 
@@ -407,7 +433,12 @@ static int enable_spk_ext_pa(struct snd_soc_component *component, int enable)
 {
 	struct snd_soc_card *card = component->card;
 	struct msm_asoc_mach_data *pdata = snd_soc_card_get_drvdata(card);
+#if !((defined CONFIG_MACH_XIAOMI_MIDO) || (defined CONFIG_MACH_XIAOMI_TISSOT))
 	int ret;
+#endif
+#ifdef CONFIG_MACH_XIAOMI_MIDO
+	int pa_mode = EXT_PA_MODE;
+#endif
 
 	if (!gpio_is_valid(pdata->spk_ext_pa_gpio)) {
 		pr_err("%s: Invalid gpio: %d\n", __func__,
@@ -415,10 +446,24 @@ static int enable_spk_ext_pa(struct snd_soc_component *component, int enable)
 		return false;
 	}
 
+#ifdef CONFIG_MACH_XIAOMI_TISSOT
+	ext_pa_status = enable;
+#endif
+
 	pr_debug("%s: %s external speaker PA\n", __func__,
 		enable ? "Enable" : "Disable");
 
 	if (enable) {
+#ifdef CONFIG_MACH_XIAOMI_MIDO
+		while (pa_mode > 0) {
+			gpio_set_value_cansleep(pdata->spk_ext_pa_gpio, 0);
+			udelay(2);
+			gpio_set_value_cansleep(pdata->spk_ext_pa_gpio, enable);
+			udelay(2);
+			pa_mode--;
+		}
+#else
+#ifndef CONFIG_MACH_XIAOMI_TISSOT
 		ret =  msm_cdc_pinctrl_select_active_state(
 					pdata->spk_ext_pa_gpio_p);
 		if (ret) {
@@ -426,9 +471,12 @@ static int enable_spk_ext_pa(struct snd_soc_component *component, int enable)
 					__func__, "ext_spk_gpio");
 			return ret;
 		}
+#endif
 		gpio_set_value_cansleep(pdata->spk_ext_pa_gpio, enable);
+#endif
 	} else {
 		gpio_set_value_cansleep(pdata->spk_ext_pa_gpio, enable);
+#if !((defined CONFIG_MACH_XIAOMI_MIDO) || (defined CONFIG_MACH_XIAOMI_TISSOT))
 		ret = msm_cdc_pinctrl_select_sleep_state(
 				pdata->spk_ext_pa_gpio_p);
 		if (ret) {
@@ -436,6 +484,7 @@ static int enable_spk_ext_pa(struct snd_soc_component *component, int enable)
 					__func__, "ext_spk_gpio");
 			return ret;
 		}
+#endif
 	}
 	return 0;
 }
@@ -1638,7 +1687,15 @@ static void *def_msm8952_wcd_mbhc_cal(void)
 		return NULL;
 
 #define S(X, Y) ((WCD_MBHC_CAL_PLUG_TYPE_PTR(msm8952_wcd_cal)->X) = (Y))
+<<<<<<< HEAD
 	S(v_hs_max, 1700);
+=======
+#if (defined CONFIG_MACH_XIAOMI_MIDO) || (defined CONFIG_MACH_XIAOMI_TISSOT)
+	S(v_hs_max, 1600);
+#else
+	S(v_hs_max, 1500);
+#endif
+>>>>>>> aa2742c31ab3 (techpack: Import initial changes for Xiaomi msm8953)
 #undef S
 #define S(X, Y) ((WCD_MBHC_CAL_BTN_DET_PTR(msm8952_wcd_cal)->X) = (Y))
 	S(num_btn, WCD_MBHC_DEF_BUTTONS);
@@ -1661,6 +1718,30 @@ static void *def_msm8952_wcd_mbhc_cal(void)
 	 * 210-290 == Button 2
 	 * 360-680 == Button 3
 	 */
+#ifdef CONFIG_MACH_XIAOMI_MIDO
+	btn_low[0] = 73;
+	btn_high[0] = 73;
+	btn_low[1] = 233;
+	btn_high[1] = 233;
+	btn_low[2] = 438;
+	btn_high[2] = 438;
+	btn_low[3] = 438;
+	btn_high[3] = 438;
+	btn_low[4] = 438;
+	btn_high[4] = 438;
+#else
+#ifdef CONFIG_MACH_XIAOMI_TISSOT
+	btn_low[0] = 91;
+	btn_high[0] = 91;
+	btn_low[1] = 259;
+	btn_high[1] = 259;
+	btn_low[2] = 488;
+	btn_high[2] = 488;
+	btn_low[3] = 488;
+	btn_high[3] = 488;
+	btn_low[4] = 488;
+	btn_high[4] = 488;
+#else
 	btn_low[0] = 75;
 	btn_high[0] = 75;
 	btn_low[1] = 150;
@@ -1670,6 +1751,7 @@ static void *def_msm8952_wcd_mbhc_cal(void)
 	btn_low[3] = 450;
 	btn_high[3] = 750;
 	btn_low[4] = 500;
+<<<<<<< HEAD
 	btn_high[4] = 750;
 
 	/* A 200ohm resistor is connected on headset mic pin on D4 P3,
@@ -1681,6 +1763,11 @@ static void *def_msm8952_wcd_mbhc_cal(void)
 		btn_high[1] = 380;
 	}
 
+=======
+	btn_high[4] = 500;
+#endif
+#endif
+>>>>>>> aa2742c31ab3 (techpack: Import initial changes for Xiaomi msm8953)
 	return msm8952_wcd_cal;
 }
 
@@ -2530,6 +2617,7 @@ static struct snd_soc_dai_link msm8952_dai[] = {
 		.ignore_pmdown_time = 1,
 		.id = MSM_FRONTEND_DAI_MULTIMEDIA19,
 	},
+<<<<<<< HEAD
 	{/* hw:x,38 */
 		.name = "Quin MI2S_RX Hostless",
 		.stream_name = "Quin MI2S_RX Hostless",
@@ -2550,6 +2638,14 @@ static struct snd_soc_dai_link msm8952_dai[] = {
 		.stream_name = "Quin MI2S_TX Hostless",
 		.cpu_dai_name = "QUIN_MI2S_TX_HOSTLESS",
 		.platform_name	= "msm-pcm-hostless",
+=======
+#ifdef CONFIG_SND_SOC_MAX98927
+        {/* hw:x,41 */
+		.name = "Quinary MI2S TX_Hostless",
+		.stream_name = "Quinary MI2S_TX Hostless Capture",
+		.cpu_dai_name = "QUIN_MI2S_TX_HOSTLESS",
+		.platform_name = "msm-pcm-hostless",
+>>>>>>> aa2742c31ab3 (techpack: Import initial changes for Xiaomi msm8953)
 		.dynamic = 1,
 		.dpcm_capture = 1,
 		.trigger = {SND_SOC_DPCM_TRIGGER_POST,
@@ -2560,6 +2656,27 @@ static struct snd_soc_dai_link msm8952_dai[] = {
 		.codec_dai_name = "snd-soc-dummy-dai",
 		.codec_name = "snd-soc-dummy",
 	},
+<<<<<<< HEAD
+=======
+	{ /* hw:x,42 */
+		.name = "Quinary MI2S_RX Hostless",
+		.stream_name = "Quinary MI2S_RX Hostless",
+		.cpu_dai_name = "QUIN_MI2S_RX_HOSTLESS",
+		.platform_name	= "msm-pcm-hostless",
+		.dynamic = 1,
+		.dpcm_playback = 1,
+		.trigger = {SND_SOC_DPCM_TRIGGER_POST,
+			SND_SOC_DPCM_TRIGGER_POST},
+		.no_host_mode = SND_SOC_DAI_LINK_NO_HOST,
+		.ignore_suspend = 1,
+		 /* this dailink has playback support */
+		.ignore_pmdown_time = 1,
+		/* This dainlink has MI2S support */
+		.codec_dai_name = "snd-soc-dummy-dai",
+		.codec_name = "snd-soc-dummy",
+	},
+#endif
+>>>>>>> aa2742c31ab3 (techpack: Import initial changes for Xiaomi msm8953)
 	{
 		.name = LPASS_BE_SEC_MI2S_RX,
 		.stream_name = "Secondary MI2S Playback",
@@ -2764,8 +2881,13 @@ static struct snd_soc_dai_link msm8952_dai[] = {
 		.stream_name = "Quinary MI2S Capture",
 		.cpu_dai_name = "msm-dai-q6-mi2s.4",
 		.platform_name = "msm-pcm-routing",
+#ifdef CONFIG_SND_SOC_MAX98927
+		.codec_dai_name = "max98927-aif1",
+		.codec_name = "max98927",
+#else
 		.codec_dai_name = "snd-soc-dummy-dai",
 		.codec_name = "snd-soc-dummy",
+#endif
 		.no_pcm = 1,
 		.dpcm_capture = 1,
 		.id = MSM_BACKEND_DAI_QUINARY_MI2S_TX,
@@ -2825,8 +2947,18 @@ static struct snd_soc_dai_link msm8952_quin_dai_link[] = {
 		/* NOTE: It's msm-dai-q6-mi2s.5 on k3.18 */
 		.cpu_dai_name = "msm-dai-q6-mi2s.4",
 		.platform_name = "msm-pcm-routing",
+<<<<<<< HEAD
 		.codec_dai_name = "tas2560 Stereo ASI1",
 		.codec_name = "tas2560s.2-004e",
+=======
+#ifdef CONFIG_SND_SOC_MAX98927
+		.codec_dai_name = "max98927-aif1",
+		.codec_name = "max98927",
+#else
+		.codec_dai_name = "snd-soc-dummy-dai",
+		.codec_name = "snd-soc-dummy",
+#endif
+>>>>>>> aa2742c31ab3 (techpack: Import initial changes for Xiaomi msm8953)
 		.no_pcm = 1,
 		.dpcm_playback = 1,
 		.id = MSM_BACKEND_DAI_QUINARY_MI2S_RX,
