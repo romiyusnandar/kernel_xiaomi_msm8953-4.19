@@ -74,6 +74,8 @@ static int msm8952_dig_mclk_event(struct snd_soc_dapm_widget *w,
 			      struct snd_kcontrol *kcontrol, int event);
 static int msm8952_wsa_switch_event(struct snd_soc_dapm_widget *w,
 			      struct snd_kcontrol *kcontrol, int event);
+static int msm_dmic_event(struct snd_soc_dapm_widget *w,
+			  struct snd_kcontrol *kcontrol, int event);
 
 #ifdef CONFIG_MACH_XIAOMI_TISSOT
 int ext_pa_gpio = 0;
@@ -97,11 +99,6 @@ static struct wcd_mbhc_config mbhc_cfg = {
 	.swap_gnd_mic = NULL,
 	.hs_ext_micbias = true,
 	.key_code[0] = KEY_MEDIA,
-<<<<<<< HEAD
-	.key_code[1] = BTN_1,
-	.key_code[2] = BTN_2,
-	.key_code[3] = 0,
-=======
 #if (defined CONFIG_MACH_XIAOMI_MIDO) || (defined CONFIG_MACH_XIAOMI_TISSOT)
 	.key_code[1] = BTN_1,
 	.key_code[2] = BTN_2,
@@ -111,7 +108,6 @@ static struct wcd_mbhc_config mbhc_cfg = {
 	.key_code[2] = KEY_VOLUMEUP,
 	.key_code[3] = KEY_VOLUMEDOWN,
 #endif
->>>>>>> aa2742c31ab3 (techpack: Import initial changes for Xiaomi msm8953)
 	.key_code[4] = 0,
 	.key_code[5] = 0,
 	.key_code[6] = 0,
@@ -1687,15 +1683,11 @@ static void *def_msm8952_wcd_mbhc_cal(void)
 		return NULL;
 
 #define S(X, Y) ((WCD_MBHC_CAL_PLUG_TYPE_PTR(msm8952_wcd_cal)->X) = (Y))
-<<<<<<< HEAD
-	S(v_hs_max, 1700);
-=======
 #if (defined CONFIG_MACH_XIAOMI_MIDO) || (defined CONFIG_MACH_XIAOMI_TISSOT)
 	S(v_hs_max, 1600);
 #else
 	S(v_hs_max, 1500);
 #endif
->>>>>>> aa2742c31ab3 (techpack: Import initial changes for Xiaomi msm8953)
 #undef S
 #define S(X, Y) ((WCD_MBHC_CAL_BTN_DET_PTR(msm8952_wcd_cal)->X) = (Y))
 	S(num_btn, WCD_MBHC_DEF_BUTTONS);
@@ -1751,23 +1743,9 @@ static void *def_msm8952_wcd_mbhc_cal(void)
 	btn_low[3] = 450;
 	btn_high[3] = 750;
 	btn_low[4] = 500;
-<<<<<<< HEAD
-	btn_high[4] = 750;
-
-	/* A 200ohm resistor is connected on headset mic pin on D4 P3,
-	   for fixing the noise issue introduced by NFC P2. So need
-	   re-calculate the button threshold */
-	hw_version = get_hw_version();
-	if (hw_version >= 0x160 && hw_version <= 0x180) {
-		btn_high[0] = 200;
-		btn_high[1] = 380;
-	}
-
-=======
 	btn_high[4] = 500;
 #endif
 #endif
->>>>>>> aa2742c31ab3 (techpack: Import initial changes for Xiaomi msm8953)
 	return msm8952_wcd_cal;
 }
 
@@ -2617,35 +2595,12 @@ static struct snd_soc_dai_link msm8952_dai[] = {
 		.ignore_pmdown_time = 1,
 		.id = MSM_FRONTEND_DAI_MULTIMEDIA19,
 	},
-<<<<<<< HEAD
-	{/* hw:x,38 */
-		.name = "Quin MI2S_RX Hostless",
-		.stream_name = "Quin MI2S_RX Hostless",
-		.cpu_dai_name = "QUIN_MI2S_RX_HOSTLESS",
-		.platform_name	= "msm-pcm-hostless",
-		.dynamic = 1,
-		.dpcm_playback = 1,
-		.trigger = {SND_SOC_DPCM_TRIGGER_POST,
-			SND_SOC_DPCM_TRIGGER_POST},
-		.no_host_mode = SND_SOC_DAI_LINK_NO_HOST,
-		.ignore_suspend = 1,
-		.ignore_pmdown_time = 1,
-		.codec_dai_name = "snd-soc-dummy-dai",
-		.codec_name = "snd-soc-dummy",
-	},
-	{ /* hw:x,39 */
-		.name = "Quin MI2S_TX Hostless",
-		.stream_name = "Quin MI2S_TX Hostless",
-		.cpu_dai_name = "QUIN_MI2S_TX_HOSTLESS",
-		.platform_name	= "msm-pcm-hostless",
-=======
 #ifdef CONFIG_SND_SOC_MAX98927
         {/* hw:x,41 */
 		.name = "Quinary MI2S TX_Hostless",
 		.stream_name = "Quinary MI2S_TX Hostless Capture",
 		.cpu_dai_name = "QUIN_MI2S_TX_HOSTLESS",
 		.platform_name = "msm-pcm-hostless",
->>>>>>> aa2742c31ab3 (techpack: Import initial changes for Xiaomi msm8953)
 		.dynamic = 1,
 		.dpcm_capture = 1,
 		.trigger = {SND_SOC_DPCM_TRIGGER_POST,
@@ -2656,8 +2611,6 @@ static struct snd_soc_dai_link msm8952_dai[] = {
 		.codec_dai_name = "snd-soc-dummy-dai",
 		.codec_name = "snd-soc-dummy",
 	},
-<<<<<<< HEAD
-=======
 	{ /* hw:x,42 */
 		.name = "Quinary MI2S_RX Hostless",
 		.stream_name = "Quinary MI2S_RX Hostless",
@@ -2676,7 +2629,6 @@ static struct snd_soc_dai_link msm8952_dai[] = {
 		.codec_name = "snd-soc-dummy",
 	},
 #endif
->>>>>>> aa2742c31ab3 (techpack: Import initial changes for Xiaomi msm8953)
 	{
 		.name = LPASS_BE_SEC_MI2S_RX,
 		.stream_name = "Secondary MI2S Playback",
@@ -2947,10 +2899,6 @@ static struct snd_soc_dai_link msm8952_quin_dai_link[] = {
 		/* NOTE: It's msm-dai-q6-mi2s.5 on k3.18 */
 		.cpu_dai_name = "msm-dai-q6-mi2s.4",
 		.platform_name = "msm-pcm-routing",
-<<<<<<< HEAD
-		.codec_dai_name = "tas2560 Stereo ASI1",
-		.codec_name = "tas2560s.2-004e",
-=======
 #ifdef CONFIG_SND_SOC_MAX98927
 		.codec_dai_name = "max98927-aif1",
 		.codec_name = "max98927",
@@ -2958,7 +2906,6 @@ static struct snd_soc_dai_link msm8952_quin_dai_link[] = {
 		.codec_dai_name = "snd-soc-dummy-dai",
 		.codec_name = "snd-soc-dummy",
 #endif
->>>>>>> aa2742c31ab3 (techpack: Import initial changes for Xiaomi msm8953)
 		.no_pcm = 1,
 		.dpcm_playback = 1,
 		.id = MSM_BACKEND_DAI_QUINARY_MI2S_RX,
@@ -3689,7 +3636,7 @@ parse_mclk_freq:
 	}
 
 	pdata->spk_ext_pa_gpio_p = of_parse_phandle(pdev->dev.of_node,
-							spk_ext_pa, 0);
+							"qcom,cdc-ext-pa-gpios", 0);
 	ret = is_us_eu_switch_gpio_support(pdev, pdata);
 	if (ret < 0) {
 		pr_err("%s: failed to is_us_eu_switch_gpio_support %d\n",
