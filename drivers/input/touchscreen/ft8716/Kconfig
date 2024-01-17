@@ -1,0 +1,10 @@
+config TOUCHSCREEN_FTS
+	tristate "FocalTech touchscreens"
+	depends on I2C
+	help
+	  Say Y here if you have a ft8716 touchscreen.
+	  Ft8716 controllers are multi touch controllers which can
+	  report 5 touches at a time.
+ 	  If unsure, say N.
+ 	  To compile this driver as a module, choose M here: the
+	  module will be called ft8716_ts.
