@@ -1,32 +1,17 @@
-# SPDX-License-Identifier: GPL-2.0
-#
-# For a description of the syntax of this configuration file,
-# see Documentation/kbuild/kconfig-language.txt.
-#
-mainmenu "Linux/$(ARCH) $(KERNELVERSION) Kernel Configuration"
+comment "Qualcomm Atheros Prima WLAN module"
 
-comment "Compiler: $(CC_VERSION_TEXT)"
+if CFG80211 && WCNSS_CORE_PRONTO
 
-source "scripts/Kconfig.include"
+config PRIMA_WLAN
+	tristate "Qualcomm Atheros Prima WLAN module"
+	default n
+	help
+	  Add support for the Qualcomm Atheros Prima WLAN module
 
-source "init/Kconfig"
+config PRONTO_WLAN
+	tristate "Qualcomm Atheros Pronto WLAN module"
+	default n
+	help
+	  Add support for the Qualcomm Atheros Pronto WLAN module
 
-source "kernel/Kconfig.freezer"
-
-source "fs/Kconfig.binfmt"
-
-source "mm/Kconfig"
-
-source "net/Kconfig"
-
-source "drivers/Kconfig"
-
-source "fs/Kconfig"
-
-source "security/Kconfig"
-
-source "crypto/Kconfig"
-
-source "lib/Kconfig"
-
-source "lib/Kconfig.debug"
+endif # CFG80211 && WCNSS_CORE_PRONTO
