@@ -53,16 +53,16 @@
 #define FTS_VENDOR_3	0xD0
 
 static unsigned char firmware_data_vendor1[] = {
-	#include "HQ_D2_XiaoMi_FT5435_BIEL0X3b_Black_V0A_D01_20170712_app.i"
+	#include "drivers/input/touchscreen/ft5435/HQ_D2_XiaoMi_FT5435_BIEL0X3b_Black_V0A_D01_20170712_app.i"
 };
 
 static unsigned char firmware_data_vendor2[] = {
 
-	#include "HQ_D2_XiaoMi_FT5435_ofiml0X51_Black_V06_D01_20170804_app.i"
+	#include "drivers/input/touchscreen/ft5435/HQ_D2_XiaoMi_FT5435_ofiml0X51_Black_V06_D01_20170804_app.i"
 };
 
 static unsigned char firmware_data_vendor3[] = {
-	#include "HQ_D2_XiaoMi_FT5435_BIEL0X3b+CTC0Xd0_Black_V09_D01_20170811_app.i"
+	#include "drivers/input/touchscreen/ft5435/HQ_D2_XiaoMi_FT5435_BIEL0X3b+CTC0Xd0_Black_V09_D01_20170811_app.i"
 
 };
 #endif
