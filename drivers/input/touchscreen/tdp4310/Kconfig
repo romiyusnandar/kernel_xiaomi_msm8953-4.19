@@ -26,6 +26,8 @@ config TOUCHSCREEN_SYNAPTICS_DSX_RMI_HID_I2C
 	depends on I2C
 endchoice
 
+endif
+
 config TOUCHSCREEN_SYNAPTICS_DSX_CORE
 	tristate "Synaptics DSX core driver module"
 	depends on I2C || SPI_MASTER
@@ -124,5 +126,3 @@ config TOUCHSCREEN_SYNAPTICS_DSX_DEBUG
 
 	  To compile this driver as a module, choose M here: the
 	  module will be called synaptics_dsx_debug.
-
-endif
