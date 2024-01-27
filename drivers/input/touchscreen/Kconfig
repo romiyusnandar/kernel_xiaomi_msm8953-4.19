@@ -1352,10 +1352,8 @@ config TOUCHSCREEN_SYNAPTICS_TCM
 
 source "drivers/input/touchscreen/synaptics_tcm/Kconfig"
 
-source "drivers/input/touchscreen/nt36xxx/Kconfig"
+source "drivers/input/touchscreen/focaltech_touch/Kconfig"
 
-source "drivers/input/touchscreen/ft5435/Kconfig"
-source "drivers/input/touchscreen/ft8716/Kconfig"
-source "drivers/input/touchscreen/tdp4310/Kconfig"
+source "drivers/input/touchscreen/nt36xxx/Kconfig"
 
 endif
