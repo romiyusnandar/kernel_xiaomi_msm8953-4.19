@@ -24,6 +24,7 @@
 
 #include <linux/ptrace.h>
 #include <asm/debug-monitors.h>
+#include "brk-imm.h"
 
 #ifndef	__ASSEMBLY__
 
