@@ -5269,6 +5269,43 @@ static bool sdhci_msm_is_bootdevice(struct device *dev)
 	return true;
 }
 
+static struct kobject *card_slot_device = NULL;
+static struct sdhci_msm_host *host_with_slot_detect = NULL;
+
+static ssize_t card_slot_status_show(struct device *dev,
+		  struct device_attribute *attr, char *buf)
+{
+	if (host_with_slot_detect && gpio_is_valid(host_with_slot_detect->pdata->status_gpio)) {
+		return snprintf(buf, PAGE_SIZE, "%d\n", mmc_gpio_get_cd(host_with_slot_detect->mmc));
+	} else
+		return -EINVAL;
+}
+
+static DEVICE_ATTR(card_slot_status, S_IRUGO ,
+						card_slot_status_show, NULL);
+
+int32_t card_slot_init_device_name(void)
+{
+	int32_t error = 0;
+	if(card_slot_device != NULL){
+		pr_err("card_slot already created\n");
+		return 0;
+	}
+	card_slot_device = kobject_create_and_add("card_slot", NULL);
+	if (card_slot_device == NULL) {
+		printk("%s: card_slot register failed\n", __func__);
+		error = -ENOMEM;
+		return error ;
+	}
+	error = sysfs_create_file(card_slot_device, &dev_attr_card_slot_status.attr);
+	if (error) {
+		printk("%s: card_slot_status_create_file failed\n", __func__);
+		kobject_del(card_slot_device);
+	}
+
+	return 0 ;
+}
+
 static int sdhci_msm_setup_ice_clk(struct sdhci_msm_host *msm_host,
 						struct platform_device *pdev)
 {
