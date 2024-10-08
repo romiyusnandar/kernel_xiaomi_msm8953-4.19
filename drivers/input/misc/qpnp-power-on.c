@@ -500,12 +500,12 @@ static ssize_t qpnp_kpdpwr_reset_show(struct device *dev,
 	struct qpnp_pon *pon = dev_get_drvdata(dev);
 	u8 val;
 	int rc;
-	rc = spmi_ext_register_readl(to_spmi_device(pon->pdev->dev.parent), QPNP_PON_S3_SRC(pon), &val, 1);
+	rc = spmi_ext_register_readl(to_spmi_device(pon->dev->parent), QPNP_PON_S3_SRC(pon), &val, 1);
 	if (rc) {
 		pr_err("Unable to read pon_dbc_ctl rc=%d\n", rc);
 		return rc;
 	}
-	rc = spmi_ext_register_readl(to_spmi_device(pon->pdev->dev.parent), QPNP_PON_KPDPWR_S2_CNTL2(pon), &val, 1);
+	rc = spmi_ext_register_readl(to_spmi_device(pon->dev->parent), QPNP_PON_KPDPWR_S2_CNTL2(pon), &val, 1);
 	if (rc) {
 		pr_err("Unable to read pon_dbc_ctl rc=%d\n", rc);
 		return rc;
@@ -839,15 +839,15 @@ int qpnp_pon_is_ps_hold_reset(void)
 		return 0;
 	}
 #endif
-		rc = spmi_ext_register_readl(to_spmi_device(pon->pdev->dev.parent),
+		rc = spmi_ext_register_readl(to_spmi_device(pon->dev->parent),
 						QPNP_POFF_REASON1(pon),
 						buf, 1);
 		if (rc) {
-			dev_err(&to_spmi_device(pon->pdev->dev.parent)->dev, "Unable to read POFF_REASON1 reg rc:%d\n",
+			dev_err(&to_spmi_device(pon->dev->parent)->dev, "Unable to read POFF_REASON1 reg rc:%d\n",
 				rc);
 			return rc;
 		}
-	dev_info(&to_spmi_device(pon->pdev->dev.parent)->dev, "QPNP_POFF_REASON1 buf[0]=%x buf[1]=%x\n", buf[0], buf[1]);
+	dev_info(&to_spmi_device(pon->dev->parent)->dev, "QPNP_POFF_REASON1 buf[0]=%x buf[1]=%x\n", buf[0], buf[1]);
 	/*The bit 1 is 1, means by PS_HOLD/MSM controlled shutdown */
 	if (buf[0] & (1<<POFF_REASON_EVENT_PS_HOLD))
 		return 1;
@@ -857,16 +857,16 @@ int qpnp_pon_is_ps_hold_reset(void)
 			reg);
 	rc = regmap_read(pon->regmap, QPNP_POFF_REASON2(pon), &reg);
 #endif
-		rc = spmi_ext_register_readl(to_spmi_device(pon->pdev->dev.parent),
+		rc = spmi_ext_register_readl(to_spmi_device(pon->dev->parent),
 						QPNP_POFF_REASON2(pon),
 						buf, 1);
 		if (rc) {
-			dev_err(&to_spmi_device(pon->pdev->dev.parent)->dev, "Unable to read POFF_REASON1 reg rc:%d\n",
+			dev_err(&to_spmi_device(pon->dev->parent)->dev, "Unable to read POFF_REASON1 reg rc:%d\n",
 				rc);
 			return rc;
 		}
-	dev_info(&to_spmi_device(pon->pdev->dev.parent)->dev, "QPNP_POFF_REASON2 buf[0]=%x buf[1]=%x\n", buf[0], buf[1]);
-	dev_info(&to_spmi_device(pon->pdev->dev.parent)->dev,
+	dev_info(&to_spmi_device(pon->dev->parent)->dev, "QPNP_POFF_REASON2 buf[0]=%x buf[1]=%x\n", buf[0], buf[1]);
+	dev_info(&to_spmi_device(pon->dev->parent)->dev,
 			"hw_reset reason2 is 0x%x\n",
 			reg);
 	return 0;
@@ -889,34 +889,34 @@ int qpnp_pon_is_lpk(void)
 		return 0;
 	}
 #endif
-	rc = spmi_ext_register_readl(to_spmi_device(pon->pdev->dev.parent),
+	rc = spmi_ext_register_readl(to_spmi_device(pon->dev->parent),
 			QPNP_POFF_REASON1(pon),
 			buf, 1);
 	if (rc) {
-		dev_err(&to_spmi_device(pon->pdev->dev.parent)->dev, "Unable to read POFF_REASON1 reg rc:%d\n",
+		dev_err(&to_spmi_device(pon->dev->parent)->dev, "Unable to read POFF_REASON1 reg rc:%d\n",
 				rc);
 		return rc;
 	}
-	dev_info(&to_spmi_device(pon->pdev->dev.parent)->dev, "QPNP_POFF_REASON1 buf[0]=%x buf[1]=%x\n", buf[0], buf[1]);
+	dev_info(&to_spmi_device(pon->dev->parent)->dev, "QPNP_POFF_REASON1 buf[0]=%x buf[1]=%x\n", buf[0], buf[1]);
 	/* The bit 7 is 1, means the off reason is powerkey */
 	if (buf[0] & (1<<POFF_REASON_EVENT_KPDPWR_N))
 		return 1;
-	dev_info(&to_spmi_device(pon->pdev->dev.parent)->dev,
+	dev_info(&to_spmi_device(pon->dev->parent)->dev,
 			"hw_reset reason1 is 0x%x\n",
 			reg);
 #if 0
 	rc = regmap_read(pon->regmap, QPNP_POFF_REASON2(pon), &reg);
 #endif
-	rc = spmi_ext_register_readl(to_spmi_device(pon->pdev->dev.parent),
+	rc = spmi_ext_register_readl(to_spmi_device(pon->dev->parent),
 			QPNP_POFF_REASON2(pon),
 			buf, 1);
 	if (rc) {
-		dev_err(&to_spmi_device(pon->pdev->dev.parent)->dev, "Unable to read POFF_REASON1 reg rc:%d\n",
+		dev_err(&to_spmi_device(pon->dev->parent)->dev, "Unable to read POFF_REASON1 reg rc:%d\n",
 				rc);
 		return rc;
 	}
-	dev_info(&to_spmi_device(pon->pdev->dev.parent)->dev, "QPNP_POFF_REASON2 buf[0]=%x buf[1]=%x\n", buf[0], buf[1]);
-	dev_info(&to_spmi_device(pon->pdev->dev.parent)->dev,
+	dev_info(&to_spmi_device(pon->dev->parent)->dev, "QPNP_POFF_REASON2 buf[0]=%x buf[1]=%x\n", buf[0], buf[1]);
+	dev_info(&to_spmi_device(pon->dev->parent)->dev,
 			"hw_reset reason2 is 0x%x\n",
 			reg);
 	return 0;
