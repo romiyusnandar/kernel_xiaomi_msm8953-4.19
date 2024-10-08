@@ -17,7 +17,7 @@
 #include <asm/setup.h>
 #include <asm/bootinfo.h>
 #include <linux/bitops.h>
-#include <linux/qpnp/power-on.h>
+#include <linux/input/qpnp-power-on.h>
 
 
 #define PMIC_NUM (16)
