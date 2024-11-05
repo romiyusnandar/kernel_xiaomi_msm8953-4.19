@@ -437,4 +437,16 @@ config MACH_XIAOMI_YSL
 	  Support for the Xiaomi Redmi S2 platform
 	  which is based on QCOM MSM8953 chipset.
 
+config YSL
+	bool "Based on Platform msm8917"
+	def_bool ARCH_MSM8917
+#end zhanghua 20170916
+
+config MACH_XIAOMI_MSM8953
+	bool  "XIAOMI platform"
+	depends on ARCH_MSM8953
+	help
+	  Support for the Xiaomi MSM8953 platform
+	  which is based on QCOM MSM8953 chipset.
+
 endmenu
