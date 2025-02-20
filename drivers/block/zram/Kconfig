@@ -44,6 +44,11 @@ config ZRAM_DEF_COMP_842
 	bool "842"
 	depends on CRYPTO_842
 
+config ZRAM_SIZE_OVERRIDE
+	int "zram size to set from kernel"
+	range 1024 16348
+	default 2048
+
 endchoice
 
 config ZRAM_DEF_COMP
