@@ -87,10 +87,24 @@ extern ssize_t arch_cpu_release(const char *, size_t);
  */
 #define CPU_ONLINE		0x0002 /* CPU is up */
 #define CPU_UP_PREPARE		0x0003 /* CPU coming up */
+#define CPU_UP_CANCELED         0x0004 /* CPU (unsigned)v NOT coming up */
+#define CPU_DOWN_PREPARE	0x0005 /* CPU (unsigned)v going down */
+#define CPU_DOWN_FAILED		0x0006 /* CPU (unsigned)v NOT going down */
 #define CPU_DEAD		0x0007 /* CPU dead */
 #define CPU_DEAD_FROZEN		0x0008 /* CPU timed out on unplug */
 #define CPU_POST_DEAD		0x0009 /* CPU successfully unplugged */
 #define CPU_BROKEN		0x000B /* CPU did not die properly */
+
+/* Used for CPU hotplug events occurring while tasks are frozen due to a suspend
+ * operation in progress
+ */
+#define CPU_TASKS_FROZEN        0x0010
+
+#define CPU_ONLINE_FROZEN       (CPU_ONLINE | CPU_TASKS_FROZEN)
+#define CPU_UP_PREPARE_FROZEN   (CPU_UP_PREPARE | CPU_TASKS_FROZEN)
+#define CPU_UP_CANCELED_FROZEN  (CPU_UP_CANCELED | CPU_TASKS_FROZEN)
+#define CPU_DOWN_PREPARE_FROZEN (CPU_DOWN_PREPARE | CPU_TASKS_FROZEN)
+#define CPU_DOWN_FAILED_FROZEN  (CPU_DOWN_FAILED | CPU_TASKS_FROZEN)
 
 #ifdef CONFIG_SMP
 extern bool cpuhp_tasks_frozen;

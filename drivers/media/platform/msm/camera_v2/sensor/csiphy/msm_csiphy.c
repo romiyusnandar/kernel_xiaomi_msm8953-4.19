@@ -764,7 +764,7 @@ static int msm_csiphy_3phase_lane_config(
 			.mipi_csiphy_3ph_lnn_ctrl1.data,
 			csiphybase + csiphy_dev->ctrl_reg->csiphy_3ph_reg
 			.mipi_csiphy_3ph_lnn_ctrl1.addr + 0x200*i);
-		msm_camera_io_w(0,
+		msm_camera_io_w(((csiphy_params->settle_cnt >> 8) & 0xff),
 			csiphybase + csiphy_dev->ctrl_reg->csiphy_3ph_reg
 			.mipi_csiphy_3ph_lnn_ctrl2.addr + 0x200*i);
 		msm_camera_io_w((csiphy_params->settle_cnt & 0xff),
@@ -955,14 +955,14 @@ static int msm_csiphy_3phase_lane_config_v50(
 		msm_camera_io_w((csiphy_params->settle_cnt & 0xff),
 			csiphybase + csiphy_dev->ctrl_reg->csiphy_3ph_reg
 			.mipi_csiphy_3ph_lnn_ctrl3.addr + 0x200*i);
-		msm_camera_io_w(0,
+		msm_camera_io_w(((csiphy_params->settle_cnt >> 8) & 0xff),
 			csiphybase + csiphy_dev->ctrl_reg->csiphy_3ph_reg
 			.mipi_csiphy_3ph_lnn_ctrl2.addr + 0x200*i);
 		msm_camera_io_w(csiphy_dev->ctrl_reg->csiphy_3ph_reg
 			.mipi_csiphy_3ph_lnn_ctrl5.data,
 			csiphybase + csiphy_dev->ctrl_reg->csiphy_3ph_reg
 			.mipi_csiphy_3ph_lnn_ctrl5.addr + 0x200*i);
-		msm_camera_io_w(0,
+		msm_camera_io_w(((csiphy_params->settle_cnt >> 8) & 0xff),
 			csiphybase + csiphy_dev->ctrl_reg->csiphy_3ph_reg
 			.mipi_csiphy_3ph_lnn_ctrl20.addr + 0x200*i);
 		msm_camera_io_w(csiphy_dev->ctrl_reg->csiphy_3ph_reg
@@ -1364,7 +1364,10 @@ static int msm_csiphy_lane_config(struct csiphy_device *csiphy_dev,
 		return rc;
 	}
 
-	clk_rate = csiphy_dev->csiphy_max_clk;
+//	clk_rate = csiphy_dev->csiphy_max_clk;
+	clk_rate = (csiphy_params->csiphy_clk > 0)
+			? csiphy_params->csiphy_clk :
+			csiphy_dev->csiphy_max_clk;
 	clk_rate = msm_camera_clk_set_rate(&csiphy_dev->pdev->dev,
 		csiphy_dev->csiphy_clk[csiphy_dev->csiphy_clk_index],
 		clk_rate);
@@ -2429,7 +2432,7 @@ static int csiphy_probe(struct platform_device *pdev)
 	snprintf(new_csiphy_dev->msm_sd.sd.name,
 		ARRAY_SIZE(new_csiphy_dev->msm_sd.sd.name), "msm_csiphy");
 	media_entity_pads_init(&new_csiphy_dev->msm_sd.sd.entity, 0, NULL);
-	new_csiphy_dev->msm_sd.sd.entity.function = MSM_CAMERA_SUBDEV_CSIPHY;
+	new_csiphy_dev->msm_sd.sd.entity.group_id = MSM_CAMERA_SUBDEV_CSIPHY;
 	new_csiphy_dev->msm_sd.close_seq = MSM_SD_CLOSE_2ND_CATEGORY | 0x4;
 	msm_sd_register(&new_csiphy_dev->msm_sd);
 

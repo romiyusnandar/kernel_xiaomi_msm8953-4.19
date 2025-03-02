@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: GPL-2.0-only
 /*
  * Copyright (c) 2012-2019, The Linux Foundation. All rights reserved.
- * Copyright (c) 2024, Qualcomm Innovation Center, Inc. All rights reserved.
  */
 #include <linux/slab.h>
 #include <linux/kthread.h>
@@ -34,6 +33,7 @@
 #define NUM_CHANNELS_STEREO 2
 #define NUM_CHANNELS_THREE 3
 #define NUM_CHANNELS_QUAD 4
+#define CVP_VERSION_1 1
 #define CVP_VERSION_2 2
 #define GAIN_Q14_FORMAT(a) (a << 14)
 
@@ -2760,13 +2760,6 @@ static int voice_send_cvs_register_cal_cmd(struct voice_data *v)
 		goto unlock;
 	}
 
-	if (col_data->cal_data.size >= MAX_COL_INFO_SIZE) {
-		pr_err("%s: Invalid cal data size %ld!\n",
-			__func__, col_data->cal_data.size);
-		ret = -EINVAL;
-		goto unlock;
-	}
-
 	memcpy(&cvs_reg_cal_cmd.cvs_cal_data.column_info[0],
 	       (void *) &((struct audio_cal_info_voc_col *)
 	       col_data->cal_info)->data,
@@ -3221,13 +3214,6 @@ static int voice_send_cvp_register_cal_cmd(struct voice_data *v)
 		 voc_get_session_name(v->session_id), v->dev_tx.dev_id,
 		 v->dev_rx.dev_id);
 
-	if (col_data->cal_data.size >= MAX_COL_INFO_SIZE) {
-		pr_err("%s: Invalid cal data size %ld!\n",
-			__func__, col_data->cal_data.size);
-		ret = -EINVAL;
-		goto unlock;
-	}
-
 	memcpy(&cvp_reg_cal_cmd.cvp_cal_data.column_info[0],
 	       (void *) &((struct audio_cal_info_voc_col *)
 	       col_data->cal_info)->data,
@@ -3385,13 +3371,6 @@ static int voice_send_cvp_register_vol_cal_cmd(struct voice_data *v)
 		pr_err("%s: Voice_get_cal failed for cal %d!\n",
 			__func__, CVP_VOCVOL_CAL);
 
-		goto unlock;
-	}
-
-	if (col_data->cal_data.size >= MAX_COL_INFO_SIZE) {
-		pr_err("%s: Invalid cal data size %ld!\n",
-			__func__, col_data->cal_data.size);
-		ret = -EINVAL;
 		goto unlock;
 	}
 
@@ -4431,6 +4410,15 @@ static int voice_send_cvp_mfc_config_cmd(struct voice_data *v)
 
 static int voice_get_avcs_version_per_service(uint32_t service_id)
 {
+#if 1
+	if (service_id == AVCS_SERVICE_ID_ALL) {
+		pr_err("%s: Invalid service id: %d", __func__,
+		       AVCS_SERVICE_ID_ALL);
+		return -EINVAL;
+	}
+	common.is_avcs_version_queried = true;
+	return CVP_VERSION_1;
+#else
 	int ret = 0;
 	size_t ver_size;
 	struct avcs_fwk_ver_info *ver_info = NULL;
@@ -4456,6 +4444,7 @@ static int voice_get_avcs_version_per_service(uint32_t service_id)
 done:
 	kfree(ver_info);
 	return ret;
+#endif
 }
 
 static void voice_mic_break_work_fn(struct work_struct *work)
@@ -7932,7 +7921,7 @@ static int32_t qdsp_cvs_callback(struct apr_client_data *data, void *priv)
 			 VSS_ISTREAM_EVT_OOB_NOTIFY_ENC_BUFFER_READY) {
 		int ret = 0;
 		u16 cvs_handle;
-		uint32_t *cvs_voc_pkt, tot_buf_sz;
+		uint32_t *cvs_voc_pkt;
 		struct cvs_enc_buffer_consumed_cmd send_enc_buf_consumed_cmd;
 		void *apr_cvs;
 
@@ -7961,14 +7950,9 @@ static int32_t qdsp_cvs_callback(struct apr_client_data *data, void *priv)
 			VSS_ISTREAM_EVT_OOB_NOTIFY_ENC_BUFFER_CONSUMED;
 
 		cvs_voc_pkt = v->shmem_info.sh_buf.buf[1].data;
-
-		if (__builtin_add_overflow(cvs_voc_pkt[2], 3 * sizeof(uint32_t), &tot_buf_sz)) {
-			 pr_err("%s: integer overflow detected\n", __func__);
-			 return -EINVAL;
-		}
-
 		if (cvs_voc_pkt != NULL &&  common.mvs_info.ul_cb != NULL) {
-			if (v->shmem_info.sh_buf.buf[1].size < tot_buf_sz) {
+			if (v->shmem_info.sh_buf.buf[1].size <
+			    ((3 * sizeof(uint32_t)) + cvs_voc_pkt[2])) {
 				pr_err("%s: invalid voc pkt size\n", __func__);
 				return -EINVAL;
 			}

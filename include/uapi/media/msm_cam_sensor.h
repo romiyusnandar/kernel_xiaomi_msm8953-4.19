@@ -91,8 +91,8 @@ enum sensor_sub_module_t {
 	SUB_MODULE_EXT,
 	SUB_MODULE_IR_LED,
 	SUB_MODULE_IR_CUT,
-	SUB_MODULE_LASER_LED,
 	SUB_MODULE_MAX,
+	SUB_MODULE_LASER_LED,
 };
 
 enum {
@@ -156,8 +156,6 @@ enum csid_cfg_type_t {
 	CSID_CFG,
 	CSID_TESTMODE_CFG,
 	CSID_RELEASE,
-	CSID_SECCAM_TOPOLOGY,
-	CSID_SECCAM_RESET,
 };
 
 enum csiphy_cfg_type_t {

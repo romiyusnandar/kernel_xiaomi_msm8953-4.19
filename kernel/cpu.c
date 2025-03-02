@@ -1036,6 +1036,7 @@ static int __ref _cpu_down(unsigned int cpu, int tasks_frozen,
 {
 	struct cpuhp_cpu_state *st = per_cpu_ptr(&cpuhp_state, cpu);
 	int prev_state, ret = 0;
+	bool hasdied = false;
 	u64 start_time = 0;
 
 	if (num_online_cpus() == 1)
@@ -1087,6 +1088,7 @@ static int __ref _cpu_down(unsigned int cpu, int tasks_frozen,
 		__cpuhp_kick_ap(st);
 	}
 
+	hasdied = prev_state != st->state && st->state == CPUHP_OFFLINE;
 out:
 	trace_cpuhp_latency(cpu, 0, start_time, ret);
 	cpus_write_unlock();
@@ -1136,7 +1138,9 @@ int cpu_down(unsigned int cpu)
 EXPORT_SYMBOL(cpu_down);
 
 #else
+#define notify_down_prepare	NULL
 #define takedown_cpu		NULL
+#define notify_dead		NULL
 #endif /*CONFIG_HOTPLUG_CPU*/
 
 /**

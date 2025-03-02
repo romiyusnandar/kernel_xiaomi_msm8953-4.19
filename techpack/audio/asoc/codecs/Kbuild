@@ -149,6 +149,11 @@ endif
 	WCD9XXX_OBJS += wcd9xxx-soc-init.o
 	WCD9XXX_OBJS += wcd-dsp-utils.o
 	WCD9XXX_OBJS += wcd-dsp-mgr.o
+endif
+
+ifdef CONFIG_COMMON_CLK_MSM
+        WCD9XXX_OBJS += audio-ext-clk.o
+else
 	WCD9XXX_OBJS += audio-ext-clk-up.o
 endif
 
@@ -219,8 +224,6 @@ CDEFINES +=	-DANI_LITTLE_BYTE_ENDIAN \
 		-DANI_OS_TYPE_ANDROID=6 \
 		-DPTT_SOCK_SVC_ENABLE \
 		-Wall\
-		-Werror\
-		-Wno-enum-conversion \
 		-D__linux__
 
 KBUILD_CPPFLAGS += $(CDEFINES)
