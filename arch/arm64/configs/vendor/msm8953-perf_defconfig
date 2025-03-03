@@ -660,6 +660,9 @@ CONFIG_EROFS_FS=y
 # Prima
 CONFIG_PRONTO_WLAN=y
 
+# Wireguard
+CONFIG_WIREGUARD=y
+
 # Misc
 # CONFIG_QPNP_SMBCHARGER is not set
 # CONFIG_QPNP_FG is not set
