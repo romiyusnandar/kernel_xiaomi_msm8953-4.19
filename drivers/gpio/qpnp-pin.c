@@ -798,7 +798,7 @@ static int qpnp_pin_to_irq(struct gpio_chip *gpio_chip, unsigned int offset)
 	oirq.args[0] = to_spmi_device(q_chip->pdev->dev.parent)->usid;
 	oirq.args[1] = (q_spec->offset >> 8) & 0xFF;
 	oirq.args[2] = 0;
-	oirq.args[3] = IRQ_TYPE_NONE;
+	oirq.args[3] = IRQ_TYPE_LEVEL_HIGH;
 	oirq.args_count = 4;
 
 	q_spec->irq = irq_create_of_mapping(&oirq);

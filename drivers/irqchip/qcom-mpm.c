@@ -290,7 +290,7 @@ static int msm_mpm_gpio_chip_alloc(struct irq_domain *domain,
 	int ret = 0;
 	struct irq_fwspec *fwspec = data;
 	irq_hw_number_t hwirq;
-	unsigned int type = IRQ_TYPE_NONE;
+	unsigned int type = IRQ_TYPE_LEVEL_HIGH;
 
 	ret = msm_mpm_gpio_chip_translate(domain, fwspec, &hwirq, &type);
 	if (ret)
