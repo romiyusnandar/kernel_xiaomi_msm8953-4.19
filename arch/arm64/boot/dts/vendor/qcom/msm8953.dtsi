@@ -67,7 +67,7 @@
 		#size-cells = <2>;
 		ranges;
 
-		other_ext_mem: other_ext_region@85b00000 {
+		other_ext_mem: other_ext_region@84A00000 {
 			compatible = "removed-dma-pool";
 			no-map;
 			reg = <0x0 0x85b00000 0x0 0xd00000>;
@@ -85,7 +85,7 @@
 			reg = <0x0 0x8d600000 0x0 0x1100000>;
 		};
 
-		wcnss_fw_mem: wcnss_fw_region@8e700000 {
+		wcnss_fw_mem: wcnss_fw_region@8e800000 {
 			compatible = "removed-dma-pool";
 			no-map;
 			reg = <0x0 0x8e700000 0x0 0x700000>;
