@@ -1308,7 +1308,7 @@ static int msm_gpio_to_irq(struct gpio_chip *chip, unsigned int offset)
 	 * Since we don't know the trigger type, let's create it with
 	 * IRQ_TYPE_NONE and let the driver override it in request_irq.
 	 */
-	fwspec.param[1] = IRQ_TYPE_LEVEL_HIGH;
+	fwspec.param[1] = IRQ_TYPE_NONE;
 	fwspec.param_count = 2;
 
 	return irq_create_fwspec_mapping(&fwspec);
@@ -1354,7 +1354,7 @@ static int msm_gpio_init(struct msm_pinctrl *pctrl)
 				| IRQCHIP_SET_TYPE_MASKED;
 	chip->irq.chip = &pctrl->irq_chip;
 	chip->irq.handler = handle_edge_irq;
-	chip->irq.default_type = IRQ_TYPE_LEVEL_HIGH;
+	chip->irq.default_type = IRQ_TYPE_NONE;
 
 	dn = of_parse_phandle(pctrl->dev->of_node, "wakeup-parent", 0);
 	if (dn) {
