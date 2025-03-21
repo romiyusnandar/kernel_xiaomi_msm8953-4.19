@@ -2536,6 +2536,12 @@ static int qpnp_pon_probe(struct platform_device *pdev)
 		return rc;
 	}
 
+	rc = device_create_file(&spmi->dev, &dev_attr_kpdpwr_reset);
+	if (rc) {
+		dev_err(&spmi->dev, "sys file creation failed rc: %d\n", rc);
+		return rc;
+	}
+
 	if (sys_reset)
 		sys_reset_dev = pon;
 	if (modem_reset)
